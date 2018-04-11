@@ -12,7 +12,7 @@
       </ul>
     </section>
     <footer :class="'stdin-area ' + (runningCommand ? 'hidden' : 'visible')">
-      <span class="prompt-string">{{ terminal.environment.promptString }}</span>
+      <span class="prompt-string">{{ terminal.standardInput.prompt }}</span>
       <input class="stdin"
              type="text"
              autofocus
@@ -31,27 +31,33 @@
 </template>
 
 <script>
-  import AliasCommand  from '../modules/Commands/AliasCommand';
-  import ClearCommand  from '../modules/Commands/ClearCommand';
-  import CurlCommand   from '../modules/Commands/CurlCommand';
-  import DateCommand   from '../modules/Commands/DateCommand';
-  import EchoCommand   from '../modules/Commands/EchoCommand';
-  import EnvCommand    from '../modules/Commands/EnvCommand';
-  import ListCommand   from '../modules/Commands/ListCommand';
-  import PromptCommand from '../modules/Commands/PromptCommand';
-  import SetCommand    from '../modules/Commands/SetCommand';
-  import Terminal      from '../modules/Terminal';
+  import AliasCommand   from '../modules/Commands/AliasCommand';
+  import ClearCommand   from '../modules/Commands/ClearCommand';
+  import CurlCommand    from '../modules/Commands/CurlCommand';
+  import DateCommand    from '../modules/Commands/DateCommand';
+  import EchoCommand    from '../modules/Commands/EchoCommand';
+  import EnvCommand     from '../modules/Commands/EnvCommand';
+  import HistoryCommand from '../modules/Commands/HistoryCommand';
+  import ListCommand    from '../modules/Commands/ListCommand';
+  import PromptCommand  from '../modules/Commands/PromptCommand';
+  import SetCommand     from '../modules/Commands/SetCommand';
+  import SleepCommand   from '../modules/Commands/SleepCommand';
+  import UptimeCommand  from '../modules/Commands/UptimeCommand';
+  import Terminal       from '../modules/Terminal';
 
   const commands = [
     new ListCommand(),
     new ClearCommand(),
     new EchoCommand(),
+    new SleepCommand(),
     new DateCommand(),
     new AliasCommand(),
     new PromptCommand(),
     new EnvCommand(),
     new SetCommand(),
-    new CurlCommand()
+    new CurlCommand(),
+    new HistoryCommand(),
+    new UptimeCommand()
   ];
 
   export default {
@@ -105,12 +111,12 @@
         this.$el.scrollTo( 0, this.$el.scrollHeight );
       },
 
-      async processCommand ( event ) {
+      async processCommand () {
         this.runningCommand = true;
         this.scrollToLastLine();
 
         return await this.terminal
-                         .handle( event )
+                         .handle()
                          .then( () => this.$nextTick( () => {
 
                            // reset running command state

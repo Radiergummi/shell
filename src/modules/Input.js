@@ -89,6 +89,10 @@ class Input {
     return fallback;
   }
 
+  parseArgument ( arg ) {
+    return this._parseArgument( arg );
+  }
+
   /**
    * Parses the command
    *
@@ -147,25 +151,7 @@ class Input {
    * @private
    */
   _parseArgument ( arg ) {
-    let matches;
-    let iteration = 0;
-
-    // loop over any variable substitutes in the value, stopping after 2048 iterations.
-    // this is a safeguard to prevent and endless loop in case of failure.
-    while ( ( matches = arg.match( /\$\w+/ig ) ) !== null && iteration !== 2048 ) {
-      let matched = matches[ 0 ].slice( 1 );
-
-      // try to fetch the variable from the environment, use the match otherwise
-      let variable = this.terminal.environment.hasOwnProperty( matched )
-                     ? this.terminal.environment[ matched ]
-                     : matched;
-
-      arg = arg.replace(
-        matches[ 0 ],
-        variable
-      );
-      iteration++;
-    }
+    arg = this.terminal.substitute( arg );
 
     if ( [ 'true', 'yes' ].includes( arg ) ) {
       return true;

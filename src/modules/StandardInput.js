@@ -6,21 +6,26 @@
  */
 
 class StandardInput {
-  constructor() {
-    this._value = '';
+  constructor ( terminal ) {
+    this._terminal = terminal;
+    this._value    = '';
   }
 
-  read() {
+  read () {
     return this._value;
   }
 
-  write(newValue) {
+  write ( newValue ) {
     this._value = newValue;
   }
 
-  clear() {
+  clear () {
     this._value = '';
+  }
+
+  get prompt () {
+    return this._terminal.substitute( this._terminal.environment.promptString );
   }
 }
 
-export default StandardInput
+export default StandardInput;

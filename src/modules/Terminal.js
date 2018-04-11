@@ -31,7 +31,7 @@ class Terminal {
      *
      * @type {StandardInput}
      */
-    this.standardInput = new StandardInput();
+    this.standardInput = new StandardInput( this );
 
     /**
      * Holds the command history instance
@@ -55,10 +55,11 @@ class Terminal {
     this.environment = {
       user:         'test',
       hostname:     window.location.hostname,
-      lastExitCode: 0
+      lastExitCode: 0,
+      bootTime:     new Date()
     };
 
-    this.environment.promptString = `${this.environment.user}@${this.environment.hostname} # `;
+    this.environment.promptString = `$user@$hostname # `;
   }
 
   /**
@@ -93,6 +94,30 @@ class Terminal {
    */
   setEnv ( variable, value ) {
     this.environment[ variable ] = value;
+  }
+
+  substitute ( text ) {
+    let matches;
+    let iteration = 0;
+
+    // loop over any variable substitutes in the value, stopping after 2048 iterations.
+    // this is a safeguard to prevent and endless loop in case of failure.
+    while ( ( matches = text.match( /\$\w+/ig ) ) !== null && iteration !== 2048 ) {
+      let matched = matches[ 0 ].slice( 1 );
+
+      // try to fetch the variable from the environment, use the match otherwise
+      let variable = this.environment.hasOwnProperty( matched )
+                     ? this.environment[ matched ]
+                     : matched;
+
+      text = text.replace(
+        matches[ 0 ],
+        variable
+      );
+      iteration++;
+    }
+
+    return text;
   }
 
   /**
@@ -196,7 +221,7 @@ class Terminal {
     const line = new Line(
       this.standardInput.read(),
       Line.streamNames.stdout,
-      this.environment.promptString
+      this.standardInput.prompt
     );
 
     // write the input to the output

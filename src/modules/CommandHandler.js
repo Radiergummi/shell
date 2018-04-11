@@ -61,7 +61,7 @@ class CommandHandler {
   hasCommand ( command ) {
     return (
       Object.keys( this.commands ).includes( command ) &&
-      typeof this.commands[ input.commandName ] !== 'undefined'
+      typeof this.commands[ command ] !== 'undefined'
     );
   }
 
