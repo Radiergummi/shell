@@ -12,6 +12,12 @@ Usually you can tell how bad it's made just by trying CTRL+L. I didn't want that
  - Full variable substitution, even for commands (parsing happens before command interpretation)
  - Command history, chainable commands, command aliases, exit codes and more
 
+## Try it
+Shell is automatically deployed here:
+
+[shell.9dev.de](https://shell.9dev.de)
+
+
 ## Motivation
 Well, yeah. Why do you do things? Because you can. This is a little experiment to see how far I can get. Having solved
 asynchronous command chains, input/output streams and promise interruptions, I'm confident there's not much that just
