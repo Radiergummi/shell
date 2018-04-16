@@ -1,5 +1,14 @@
 'use strict';
 
+/**
+ *
+ * @param buffer
+ * @param offset
+ * @param isLE
+ * @param mLen
+ * @param nBytes
+ * @return {number}
+ */
 export function read ( buffer, offset, isLE, mLen, nBytes ) {
   const eLen  = nBytes * 8 - mLen - 1;
   const eMax  = ( 1 << eLen ) - 1;
@@ -35,6 +44,15 @@ export function read ( buffer, offset, isLE, mLen, nBytes ) {
   return ( s ? -1 : 1 ) * m * Math.pow( 2, e - mLen );
 }
 
+/**
+ *
+ * @param buffer
+ * @param value
+ * @param offset
+ * @param isLE
+ * @param mLen
+ * @param nBytes
+ */
 export function write ( buffer, value, offset, isLE, mLen, nBytes ) {
   let eLen    = nBytes * 8 - mLen - 1;
   const eMax  = ( 1 << eLen ) - 1;

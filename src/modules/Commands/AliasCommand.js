@@ -9,7 +9,8 @@ class AliasCommand extends Command {
     this.setName( 'alias' );
     this.setDescription( 'Creates an alias for another command' );
 
-    this.addArgument( 'alias', CommandArgument.types.value_required, 'Alias to set in the format alias="command"' );
+    this.setUsage('Provide a command alias as ALIAS="COMMAND"');
+    this.addArgument( 'alias', CommandArgument.types.value_required, 'Alias to set in the format ALIAS="COMMAND"' );
   }
 
   /**

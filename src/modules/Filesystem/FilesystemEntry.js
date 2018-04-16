@@ -6,14 +6,21 @@ class FilesystemEntry extends Node {
 
   /**
    *
-   * @param {Buffer|string|number} content
+   * @param {Buffer|string|number} content entry content
+   * @param {string}               name    entry name
    */
-  constructor ( content ) {
-    super( Buffer.from( content ) );
+  constructor ( content, name ) {
+
+    //noinspection JSCheckFunctionSignatures
+    super( Buffer.from( content ), name );
   }
 
   get buffer () {
     return this.nodeValue;
+  }
+
+  get content () {
+    return this.buffer;
   }
 }
 

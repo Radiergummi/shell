@@ -14,6 +14,11 @@ for ( let i = 0, len = code.length; i < len; ++i ) {
 revLookup[ '-'.charCodeAt( 0 ) ] = 62;
 revLookup[ '_'.charCodeAt( 0 ) ] = 63;
 
+/**
+ *
+ * @param b64
+ * @return {number}
+ */
 function placeHoldersCount ( b64 ) {
   const len = b64.length;
 
@@ -89,6 +94,11 @@ function encodeChunk ( uint8, start, end ) {
   return output.join( '' );
 }
 
+/**
+ *
+ * @param uint8
+ * @return {string}
+ */
 export function fromByteArray ( uint8 ) {
   const len            = uint8.length;
   const extraBytes     = len % 3; // if we have 1 byte left, pad 2 bytes

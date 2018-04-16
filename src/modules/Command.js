@@ -147,6 +147,7 @@ class Command {
       output,
       commands:    input.handler.commands,
       terminal:    output.terminal,
+      storage:     output.terminal.storage,
       environment: output.terminal.environment,
       writeLine:   output.standardOutput.writeLine,
       write:       output.standardOutput.write,
@@ -202,7 +203,10 @@ class Command {
                 CommandOption.expressions.value_optional( option )
               ) || [] ).slice( 1 );
 
-              input.options.push( { name: option.longName, value: optionalValue } );
+              input.options.push( {
+                                    name:  option.longName,
+                                    value: optionalValue
+                                  } );
               break;
 
             // command options with a required input value

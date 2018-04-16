@@ -21,11 +21,11 @@ class Node {
    *
    * @param {Node}   parentNode node's parent node
    * @param {Buffer} value      content of the node
-   * @param {string} path       node path
+   * @param {string} name       node name
    *
    * @constructor
    */
-  constructor ( value = new Buffer( [] ), path = '', parentNode = null ) {
+  constructor ( value = new Buffer( [] ), name = '', parentNode = null ) {
 
     /**
      * the Nodes direct parent node
@@ -33,17 +33,6 @@ class Node {
      * @type {Node}
      */
     this._parentNode = parentNode;
-
-    /**
-     * Node ID
-     * The Node ID is context dependent: It will always reflect the depth of a node within its tree.
-     * The first digit is always zero, reflecting the root node. If the node is a child node, its
-     * index number will be appended, separated by a colon.
-     * Therefore, the ID will uniquely identify a node within a tree, but not among trees.
-     *
-     * @type {string}
-     */
-    this.path = this.constructor._createNodePath( this.parentNode, path );
 
     /**
      * Unique ID
@@ -55,6 +44,8 @@ class Node {
      * @type {string}
      */
     this.uid = uuid();
+
+    this.name = name;
 
     /**
      * Node data
@@ -69,6 +60,19 @@ class Node {
      * @type {Array.<Node>}
      */
     this.childNodes = [];
+  }
+
+  /**
+   * Node path
+   * The Node path is context dependent: It will always reflect the depth of a node within its tree.
+   * The first digit is always zero, reflecting the root node. If the node is a child node, its
+   * index number will be appended, separated by a colon.
+   * Therefore, the ID will uniquely identify a node within a tree, but not among trees.
+   *
+   * @type {string}
+   */
+  get path () {
+    return this.constructor._createNodePath( this.parentNode, this.name || this.uid );
   }
 
   /**
@@ -398,7 +402,7 @@ class Node {
   /**
    * retrieves the node value
    *
-   * @return {object}
+   * @return {Buffer}
    */
   get nodeValue () {
     return this._value;
@@ -407,7 +411,7 @@ class Node {
   /**
    * sets the node value
    *
-   * @param {object} value
+   * @param {Buffer} value
    */
   set nodeValue ( value ) {
     this._value = value;
@@ -451,7 +455,7 @@ class Node {
    */
   set parentNode ( node ) {
     this._parentNode = node;
-    this.path        = this.constructor._createNodePath( this.parentNode, this.path );
+    //this.path        = this.constructor._createNodePath( this.parentNode, this.path );
   }
 
   /**
@@ -589,7 +593,7 @@ class Node {
    */
   static _createNodePath ( parentNode = null, path = '' ) {
     return ( parentNode
-             ? `${parentNode.path}/${path}`
+             ? `${parentNode.path.replace( /\/$/, '' )}/${path}`
              : '/'
     );
   }

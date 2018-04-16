@@ -1,18 +1,42 @@
 'use strict';
 
 import FilesystemEntry from './FilesystemEntry';
+import { basename }    from './path';
 
 class Disk {
 
   /**
+   * Holds available disk flags
+   *
+   * @returns {{primary: boolean, readOnly: boolean}}
+   */
+  static get flags () {
+    return {
+      primary:  false,
+      readOnly: false
+    };
+  }
+
+  /**
    * Creates a new disk
    *
-   * @param {string}     name       name of the disk
-   * @param {Filesystem} filesystem filesystem to use
+   * @param {string}                                  name       name of the disk
+   * @param {Filesystem}                              filesystem filesystem to use
+   * @param {{primary?: boolean, readOnly?: boolean}} [flags]    disk flags
    */
-  constructor ( name, filesystem ) {
-    this.name        = name;
-    this._filesystem = filesystem;
+  constructor ( name, filesystem, flags = {} ) {
+    this.name       = name;
+    this.filesystem = filesystem;
+
+    //noinspection JSUnresolvedVariable
+    /**
+     * Holds all disk flags
+     *
+     * @type {{primary: boolean, readOnly: boolean}}
+     */
+    this.flags = Object.assign( {}, this.constructor.flags, flags );
+
+    filesystem.initialize( this );
   }
 
   /**
@@ -22,7 +46,7 @@ class Disk {
    * @return {Promise<FilesystemEntry>}
    */
   async read ( path ) {
-    return await this._filesystem.read( path );
+    return await this.filesystem.readFile( path );
   }
 
   /**
@@ -34,7 +58,7 @@ class Disk {
    * @return {Promise<FilesystemEntry>}
    */
   async write ( buffer, path, options = {} ) {
-    return await this._filesystem.write( path, Buffer.from( buffer ), options );
+    return await this.filesystem.writeFile( path, Buffer.from( buffer ), options );
   }
 
   /**
@@ -44,7 +68,7 @@ class Disk {
    * @return {Promise<boolean>}
    */
   async exists ( path ) {
-    return await this._filesystem.exists( path );
+    return await this.filesystem.exists( path );
   }
 
   /**
@@ -60,12 +84,7 @@ class Disk {
       throw new TypeError( `Invalid type "${typeof file}": putFile only accepts objects of type FilesystemEntry` );
     }
 
-    return await this.write( file.buffer, path, {} )
-                     .then( file => {
-                       file.path = path;
-
-                       return file;
-                     } );
+    return await this.write( file.buffer, path, {} );
   }
 
   /**
@@ -76,7 +95,7 @@ class Disk {
    * @return {Promise<FilesystemEntry>}
    */
   async put ( content, path ) {
-    return await this.putFile( new FilesystemEntry( content ), path );
+    return await this.putFile( new FilesystemEntry( content, basename( path ) ), path );
   }
 
   /**

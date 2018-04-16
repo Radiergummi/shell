@@ -1,8 +1,6 @@
-import Vue        from 'vue';
-import App        from './App';
-import Buffer     from './modules/Buffer';
-import Filesystem from './modules/Filesystem';
-import Disk       from './modules/Filesystem/Disk';
+import Vue    from 'vue';
+import App    from './App';
+import Buffer from './modules/Buffer';
 
 window.Buffer = Buffer;
 const app     = new Vue( {
@@ -12,5 +10,3 @@ const app     = new Vue( {
                          } );
 
 window.app = app;
-
-window.fs = new Disk( 'test', new Filesystem('test-fs') );

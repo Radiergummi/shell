@@ -77,6 +77,20 @@ class CommandHandler {
       this.commands[ command.getName() ] = command;
     }
   }
+
+  /**
+   * Runs another command
+   *
+   * @param  {string}     command
+   * @param  {Input}      input
+   * @param  {Output}     output
+   * @return {Promise<*>}
+   */
+  run ( command, input, output ) {
+    input.commandName = command;
+
+    return this.handle( input, output );
+  }
 }
 
 export default CommandHandler;

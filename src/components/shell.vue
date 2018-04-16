@@ -1,5 +1,5 @@
 <template>
-  <article class="shell" @click="focusStdIn">
+  <article class="shell" :style="displayStyle" @click="focusStdIn">
     <section class="display" v-cloak>
       <ul class="lines">
         <li
@@ -13,39 +13,52 @@
     </section>
     <footer :class="'stdin-area ' + (runningCommand ? 'hidden' : 'visible')">
       <span class="prompt-string">{{ terminal.standardInput.prompt }}</span>
-      <input class="stdin"
-             type="text"
-             autofocus
-             v-model="stdinValue"
-             @keydown.enter="processCommand"
-             @keyup.up="insertPreviousCommand"
-             @keyup.down="insertNextCommand"
-             @keydown.tab.stop.prevent="handleTab"
-             @keydown.ctrl.76="handleClear"
-             @keydown.ctrl.67="handleCancel"
-             ref="stdin"
-             title="STDIN"
+      <input
+        class="stdin"
+        type="text"
+        autofocus
+        v-model="stdinValue"
+        @keydown.enter="processCommand"
+        @keyup.up="insertPreviousCommand"
+        @keyup.down="insertNextCommand"
+        @keydown.tab.stop.prevent="handleTab"
+        @keydown.ctrl.76="handleClear"
+        @keydown.ctrl.67="handleCancel"
+        ref="stdin"
+        title="STDIN"
       >
     </footer>
   </article>
 </template>
 
 <script>
-  import AliasCommand   from '../modules/Commands/AliasCommand';
-  import ClearCommand   from '../modules/Commands/ClearCommand';
-  import CurlCommand    from '../modules/Commands/CurlCommand';
-  import DateCommand    from '../modules/Commands/DateCommand';
-  import EchoCommand    from '../modules/Commands/EchoCommand';
-  import EnvCommand     from '../modules/Commands/EnvCommand';
-  import HistoryCommand from '../modules/Commands/HistoryCommand';
-  import ListCommand    from '../modules/Commands/ListCommand';
-  import PromptCommand  from '../modules/Commands/PromptCommand';
-  import SetCommand     from '../modules/Commands/SetCommand';
-  import SleepCommand   from '../modules/Commands/SleepCommand';
-  import UptimeCommand  from '../modules/Commands/UptimeCommand';
-  import Terminal       from '../modules/Terminal';
+  import AliasCommand           from '../modules/Commands/AliasCommand';
+  import ChangeDirectoryCommand from '../modules/Commands/ChangeDirectoryCommand';
+  import ClearCommand           from '../modules/Commands/ClearCommand';
+  import CurlCommand            from '../modules/Commands/CurlCommand';
+  import DateCommand            from '../modules/Commands/DateCommand';
+  import EchoCommand            from '../modules/Commands/EchoCommand';
+  import EnvCommand             from '../modules/Commands/EnvCommand';
+  import HelpCommand            from '../modules/Commands/HelpCommand';
+  import HistoryCommand         from '../modules/Commands/HistoryCommand';
+  import ListCommand            from '../modules/Commands/ListCommand';
+  import LsCommand              from '../modules/Commands/LsCommand';
+  import PromptCommand          from '../modules/Commands/PromptCommand';
+  import SetCommand             from '../modules/Commands/SetCommand';
+  import SettermCommand         from '../modules/Commands/SettermCommand';
+  import SleepCommand           from '../modules/Commands/SleepCommand';
+  import UptimeCommand          from '../modules/Commands/UptimeCommand';
+  import Disk                   from '../modules/Filesystem/Disk';
+  import LocalStorageFilesystem from '../modules/Filesystem/LocalStorageFilesystem';
+  import Terminal               from '../modules/Terminal';
+
+  const storage = [
+    new Disk( 'sda1', new LocalStorageFilesystem( 'sda1' ), { primary: true } ),
+    new Disk( 'sda2', new LocalStorageFilesystem( 'sda2' ) )
+  ];
 
   const commands = [
+    new HelpCommand(),
     new ListCommand(),
     new ClearCommand(),
     new EchoCommand(),
@@ -57,7 +70,11 @@
     new SetCommand(),
     new CurlCommand(),
     new HistoryCommand(),
-    new UptimeCommand()
+    new UptimeCommand(),
+    new SettermCommand(),
+
+    new LsCommand(),
+    new ChangeDirectoryCommand()
   ];
 
   export default {
@@ -66,7 +83,7 @@
     data () {
       return {
         runningCommand: false,
-        terminal:       new Terminal()
+        terminal:       new Terminal( window )
       };
     },
 
@@ -79,6 +96,13 @@
         set ( newValue ) {
           this.terminal.standardInput.write( newValue );
         }
+      },
+
+      displayStyle () {
+        return {
+          '--shell-color':            this.terminal.style.foreground,
+          '--shell-background-color': this.terminal.style.background
+        };
       }
     },
 
@@ -100,6 +124,8 @@
       for ( let command of commands ) {
         this.terminal.registerCommand( command );
       }
+
+      this.terminal.loadStorage( storage );
     },
 
     methods: {

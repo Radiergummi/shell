@@ -1,14 +1,23 @@
 'use strict';
 
-import CommandHandler from './CommandHandler';
-import CommandHistory from './CommandHistory';
-import Input          from './Input';
-import Line           from './Line';
-import Output         from './Output';
-import StandardInput  from './StandardInput';
+import CommandHandler    from './CommandHandler';
+import CommandHistory    from './CommandHistory';
+import VirtualFilesystem from './Filesystem/VirtualFilesystem';
+import Input             from './Input';
+import Line              from './Line';
+import Output            from './Output';
+import StandardInput     from './StandardInput';
 
 class Terminal {
-  constructor () {
+  constructor ( global ) {
+    this._global = global;
+
+    /**
+     * Holds the application storage disks
+     *
+     * @type {VirtualFilesystem}
+     */
+    this.storage = null;
 
     /**
      * Holds the current cancellation status. In order to quit the command promise once a cancel signal
@@ -53,13 +62,33 @@ class Terminal {
      * @type {object}
      */
     this.environment = {
+      pwd:          '/',
       user:         'test',
       hostname:     window.location.hostname,
       lastExitCode: 0,
       bootTime:     new Date()
     };
 
-    this.environment.promptString = `$user@$hostname # `;
+    this.style = {
+      background: 'black',
+      foreground: 'white'
+    };
+
+    this.environment.promptString = `$user@$hostname $pwd # `;
+  }
+
+  loadStorage ( disks ) {
+    this.storage = new VirtualFilesystem( disks );
+
+    this.setEnv( 'pwd', this.storage.path );
+  }
+
+  setForeground ( color = 'inherit' ) {
+    this.style.foreground = color;
+  }
+
+  setBackground ( color = 'inherit' ) {
+    this.style.background = color;
   }
 
   /**

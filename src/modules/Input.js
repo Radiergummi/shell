@@ -17,6 +17,8 @@ class Input {
      */
     this.terminal = terminal;
 
+    this._raw = text;
+
     const [ commandName, ...argv ] = this._parseArguments( text );
 
     /**
@@ -67,6 +69,18 @@ class Input {
     return fallback;
   }
 
+  addOption ( name, value ) {
+    if ( this.hasOption( name ) ) {
+      const option = this.options.find( option => option.name === name );
+
+      if ( option ) {
+        option.value = value;
+      }
+    } else {
+      this.options.push( { name, value } );
+    }
+  }
+
   hasArgument ( name ) {
     for ( let argument of this.arguments ) {
       if ( argument.name === name && argument.value ) {
@@ -89,8 +103,27 @@ class Input {
     return fallback;
   }
 
+  addArgument ( name, value ) {
+    if ( this.hasArgument( name ) ) {
+      const argument = this.arguments.find( argument => argument.name === name );
+
+      if ( argument ) {
+        argument.value = value;
+      }
+    } else {
+      this.arguments.push( { name, value } );
+    }
+  }
+
   parseArgument ( arg ) {
     return this._parseArgument( arg );
+  }
+
+  create ( newText = this._raw ) {
+    const input   = new Input( this.terminal, newText );
+    input.handler = this.handler;
+
+    return input;
   }
 
   /**
