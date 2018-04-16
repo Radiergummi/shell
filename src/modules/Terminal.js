@@ -2,6 +2,7 @@
 
 import CommandHandler    from './CommandHandler';
 import CommandHistory    from './CommandHistory';
+import FileOutputStream  from './Filesystem/FileOutputStream';
 import VirtualFilesystem from './Filesystem/VirtualFilesystem';
 import Input             from './Input';
 import Line              from './Line';
@@ -280,13 +281,19 @@ class Terminal {
    */
   async handleCall ( call ) {
     try {
+      let redirection;
+
+      if ( call.match( / > / ) ) {
+        [ call, redirection ] = call.split( ' > ' );
+      }
+
       // set up a race condition between actual command and cancellator
       const output = await Promise
         .race(
           [
             this.handler.handle(
               new Input( this, call ),
-              new Output( this )
+              new Output( this, redirection ? new FileOutputStream( this.storage.find( redirection ) ) : undefined )
             ),
 
             this.constructor._cancellator.call( this )

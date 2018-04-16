@@ -1,4 +1,5 @@
 'use strict';
+import { ENOENT }                     from './Filesystem/errors';
 import FilesystemDirectoryEntry       from './Filesystem/FilesystemDirectoryEntry';
 import FilesystemEntry                from './Filesystem/FilesystemEntry';
 import { basename, dirname, resolve } from './Filesystem/path';
@@ -6,8 +7,8 @@ import { basename, dirname, resolve } from './Filesystem/path';
 class Filesystem extends FilesystemDirectoryEntry {
   static get flags () {
     return {
-      append: 1,
-      lock:   2
+      append: 'APPEND',
+      lock:   'LOCK'
     };
   }
 
@@ -51,7 +52,7 @@ class Filesystem extends FilesystemDirectoryEntry {
       const entry = this._resolvePath( path );
 
       if ( !entry ) {
-        return reject( `No such file: ${path}` );
+        return reject( `${ENOENT}: ${path}` );
       }
 
       return resolve( entry );
@@ -61,9 +62,10 @@ class Filesystem extends FilesystemDirectoryEntry {
   /**
    * Writes a file to the file system
    *
-   * @param  {Buffer} content
-   * @param  {string} path
-   * @param  {Object} options
+   * @param  {Buffer}  content
+   * @param  {string}  path
+   * @param  {Object}  options
+   * @param  {boolean} options.append
    * @return {Promise<FilesystemEntry>}
    */
   writeFile ( path, content, options = {} ) {
@@ -71,12 +73,26 @@ class Filesystem extends FilesystemDirectoryEntry {
       const directory = this._resolvePath( dirname( path ) );
 
       if ( directory instanceof FilesystemDirectoryEntry ) {
-        const file = this.find( directory ).appendChild( new FilesystemEntry( content, basename( path ) ) );
+        let file;
+
+        if ( this.exists( path ) && ( file = this._resolvePath( path ) ) ) {
+          console.log( path + ' exists', file );
+
+          if ( options.append ) {
+            file.buffer += content;
+          } else {
+            file.buffer = content;
+          }
+        } else {
+          file = directory.appendChild( new FilesystemEntry( content, basename( path ) ) );
+        }
+
+        file.fileystem = this;
 
         return resolve( file );
       }
 
-      return reject( `No such directory: ${directory}` );
+      return reject( `${ENOENT}: ${directory}` );
     } );
   }
 

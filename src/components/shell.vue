@@ -33,6 +33,7 @@
 
 <script>
   import AliasCommand           from '../modules/Commands/AliasCommand';
+  import CatCommand             from '../modules/Commands/CatCommand';
   import ChangeDirectoryCommand from '../modules/Commands/ChangeDirectoryCommand';
   import ClearCommand           from '../modules/Commands/ClearCommand';
   import CurlCommand            from '../modules/Commands/CurlCommand';
@@ -74,7 +75,8 @@
     new SettermCommand(),
 
     new LsCommand(),
-    new ChangeDirectoryCommand()
+    new ChangeDirectoryCommand(),
+    new CatCommand()
   ];
 
   export default {

@@ -10,8 +10,10 @@ class Output {
   /**
    *
    * @param {Terminal} terminal
+   * @param {OutputStream} stdout
+   * @param {OutputStream} stderr
    */
-  constructor ( terminal ) {
+  constructor ( terminal, stdout = new OutputStream( 'stdout' ), stderr = new OutputStream( 'stderr' ) ) {
 
     /**
      * Holds the application
@@ -24,14 +26,14 @@ class Output {
      * Retrieves the standard output stream
      * @type {OutputStream}
      */
-    this.standardOutput = new OutputStream( 'stdout' );
+    this.standardOutput = stdout;
 
     /**
      * Retrieves the standard error stream
      *
      * @type {OutputStream}
      */
-    this.standardError = new OutputStream( 'stderr' );
+    this.standardError = stderr;
   }
 
   clear () {

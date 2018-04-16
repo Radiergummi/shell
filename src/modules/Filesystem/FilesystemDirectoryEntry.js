@@ -74,6 +74,10 @@ class FilesystemDirectoryEntry extends FilesystemEntry {
 
     return Promise.resolve( this.removeChild( this.find( mountPoint ) ) );
   }
+
+  static get isDirectory () {
+    return true;
+  }
 }
 
 export default FilesystemDirectoryEntry;
