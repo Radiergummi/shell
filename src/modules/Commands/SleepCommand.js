@@ -12,6 +12,7 @@ class SleepCommand extends Command {
   }
 
   run ( input, output ) {
+
     const timeout = input.getArgument( 'seconds' ) * 1000;
 
     return new Promise( resolve => setTimeout( () => resolve(), timeout ) );

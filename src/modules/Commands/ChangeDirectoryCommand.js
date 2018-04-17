@@ -2,6 +2,7 @@
 
 import Command         from '../Command';
 import CommandArgument from '../CommandArgument';
+import { resolve }     from '../Filesystem/path';
 
 class ChangeDirectoryCommand extends Command {
   configure () {
@@ -17,13 +18,13 @@ class ChangeDirectoryCommand extends Command {
   }
 
   run ( input, output ) {
-    const path = input.getArgument( 'path' );
+    const path = resolve( input.terminal.getEnv( 'pwd' ), input.getArgument( 'path' ) );
 
-    if ( !input.terminal.storage.find( path ) ) {
-      return this.throw( `No such directory: ${path}` );
-    }
-
-    input.terminal.setEnv( 'pwd', path );
+    return input.terminal.storage.exists( path )
+                .then( exists => exists
+                                 ? input.terminal.setEnv( 'pwd', path )
+                                 : this.throw( `No such directory: ${path}` )
+                );
   }
 }
 

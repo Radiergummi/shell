@@ -33,6 +33,7 @@ class SettermCommand extends Command {
   }
 
   run ( input, output ) {
+    console.log( input );
     if ( input.getOption( 'reset' ) ) {
       output.terminal.setForeground();
       output.terminal.setBackground();

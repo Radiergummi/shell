@@ -1,9 +1,10 @@
 'use strict';
 
-import { EISDIR, ENOENT } from '../Filesystem/errors';
 import Command            from '../Command';
 import CommandArgument    from '../CommandArgument';
 import CommandOption      from '../CommandOption';
+import { EISDIR, ENOENT } from '../Filesystem/errors';
+import { resolve }        from '../Filesystem/path';
 
 class CatCommand extends Command {
   configure () {
@@ -18,13 +19,14 @@ class CatCommand extends Command {
   run ( input, output ) {
     const numberLines = input.getOption( 'number', false );
     const fileName    = input.getArgument( 'file' );
+    const filePath    = resolve( this.terminal.getEnv( 'pwd' ), fileName );
 
-    if ( !input.terminal.storage.exists( fileName ) ) {
+    if ( !input.terminal.storage.exists( filePath ) ) {
       return this.throw( `${ENOENT}: ${fileName}` );
     }
 
     return input.terminal.storage
-                .readFile( fileName )
+                .readFile( filePath )
                 .then( file => {
                   if ( file.isDirectory ) {
                     this.throw( `${EISDIR}: ${file.path}` );
