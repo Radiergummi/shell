@@ -139,7 +139,7 @@ export function resolve ( ...paths ) {
       path = paths[ i ];
     } else {
       if ( cwd === undefined ) {
-        cwd = process.cwd();
+        cwd = '/';
       }
 
       path = cwd;

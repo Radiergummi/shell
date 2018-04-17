@@ -19,13 +19,14 @@ class Node {
   /**
    * creates a new Node
    *
-   * @param {Node}   parentNode node's parent node
    * @param {Buffer} value      content of the node
    * @param {string} name       node name
+   * @param {Node}   parentNode node's parent node
+   * @param {Object} meta       node meta data
    *
    * @constructor
    */
-  constructor ( value = new Buffer( [] ), name = '', parentNode = null ) {
+  constructor ( value = new Buffer( [] ), name = '', parentNode = null, meta = {} ) {
 
     /**
      * the Nodes direct parent node
@@ -45,6 +46,11 @@ class Node {
      */
     this.uid = uuid();
 
+    /**
+     * Node name
+     *
+     * @type {string}
+     */
     this.name = name;
 
     /**
@@ -59,7 +65,20 @@ class Node {
      *
      * @type {Array.<Node>}
      */
-    this.childNodes = [];
+    this._childNodes = [];
+
+    this.meta = Object.assign( {
+                                 creationTime:     new Date(),
+                                 modificationTime: new Date()
+                               }, meta );
+  }
+
+  get childNodes () {
+    return this._childNodes;
+  }
+
+  set childNodes ( value ) {
+    this._childNodes = value;
   }
 
   /**
@@ -73,6 +92,14 @@ class Node {
    */
   get path () {
     return this.constructor._createNodePath( this.parentNode, this.name || this.uid );
+  }
+
+  get modificationTime () {
+    return this.meta.modificationTime;
+  }
+
+  get creationTime () {
+    return this.meta.creationTime;
   }
 
   /**
@@ -178,7 +205,7 @@ class Node {
     // handle a node path or UID
     else if ( typeof predicate === 'string' ) {
       iterator = node => {
-        if ( node.path === predicate || node.uid === predicate ) {
+        if ( node.uid === predicate ) {
           match = node;
 
           return false;

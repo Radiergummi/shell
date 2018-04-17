@@ -1,23 +1,39 @@
 'use strict';
 
-import { EEXIST, ENOTDIR }             from './errors';
-import FilesystemCurrentDirectoryEntry from './FilesystemCurrentDirectoryEntry';
-import FilesystemEntry                 from './FilesystemEntry';
-import FilesystemParentDirectoryEntry  from './FilesystemParentDirectoryEntry';
-import { resolve }                     from './path';
+import { EEXIST, ENOTDIR }      from './errors';
+import FilesystemDirectoryEntry from './FilesystemDirectoryEntry';
+import FilesystemEntry          from './FilesystemEntry';
 
-class FilesystemDirectoryEntry extends FilesystemEntry {
-
-  /**
-   * Creates a new directory entry
-   *
-   * @param {string} name entry name
-   */
-  constructor ( name ) {
-
-    super( '', name );
-
+class FilesystemParentDirectoryEntry extends FilesystemEntry {
+  constructor () {
+    super( '', '..' );
   }
+
+  get path () {
+    return (
+      this.isRootNode
+      ? super.path
+      : (
+        this.parentNode.isRootNode
+        ? this.parentNode.path
+        : this.parentNode.parentNode.path
+      )
+    );
+  }
+
+  /*
+   get childNodes() {
+   return (
+   this.isRootNode
+   ? super.childNodes
+   : (
+   this.parentNode.isRootNode
+   ? this.parentNode.childNodes
+   : this.parentNode.parentNode.childNodes
+   )
+   );
+   }
+   */
 
   get nodeValue () {
     return undefined;
@@ -33,38 +49,6 @@ class FilesystemDirectoryEntry extends FilesystemEntry {
 
   get content () {
     return undefined;
-  }
-
-  get childrenEntries () {
-    return [
-      new FilesystemCurrentDirectoryEntry(),
-      new FilesystemParentDirectoryEntry()
-    ].concat( this.childNodes );
-  }
-
-  find ( path ) {
-    let match = null;
-
-    if ( path === '.' ) {
-      return this;
-    }
-
-    if ( path === '..' ) {
-      return this.parentNode || this;
-    }
-
-    //noinspection JSCheckFunctionSignatures
-    const resolvedPath = resolve( this.path, path );
-
-    this.traverseDown( node => {
-      if ( !node.isDotDirectory && node.path === resolvedPath ) {
-        match = node;
-
-        return false;
-      }
-    } );
-
-    return match;
   }
 
   /**
@@ -113,6 +97,10 @@ class FilesystemDirectoryEntry extends FilesystemEntry {
   static get isDirectory () {
     return true;
   }
+
+  static get isDotDirectory () {
+    return true;
+  }
 }
 
-export default FilesystemDirectoryEntry;
+export default FilesystemParentDirectoryEntry;

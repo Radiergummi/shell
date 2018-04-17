@@ -13,8 +13,7 @@ class Filesystem extends FilesystemDirectoryEntry {
   }
 
   constructor ( name ) {
-    super();
-    this.name = name;
+    super( name );
   }
 
   /**
@@ -76,7 +75,6 @@ class Filesystem extends FilesystemDirectoryEntry {
         let file;
 
         if ( this.exists( path ) && ( file = this._resolvePath( path ) ) ) {
-          console.log( path + ' exists', file );
 
           if ( options.append ) {
             file.buffer += content;
@@ -107,7 +105,9 @@ class Filesystem extends FilesystemDirectoryEntry {
   }
 
   _resolvePath ( path ) {
-    return this.find( resolve( path ) );
+
+    //noinspection JSCheckFunctionSignatures
+    return this.find( resolve( this.path, path ) );
   }
 }
 
