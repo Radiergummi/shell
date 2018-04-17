@@ -24,6 +24,12 @@
         @keydown.tab.stop.prevent="handleTab"
         @keydown.ctrl.76="handleClear"
         @keydown.ctrl.67="handleCancel"
+        @keydown.ctrl.65="moveCursorStart"
+        @keydown.ctrl.69="moveCursorEnd"
+        @keydown.ctrl.87="handleRemoveLastWord"
+        @keydown.alt.delete="handleRemoveLastWord"
+        @keydown.ctrl.187="increaseFontSize"
+        @keydown.ctrl.189="decreaseFontSize"
         ref="stdin"
         title="STDIN"
       >
@@ -32,26 +38,28 @@
 </template>
 
 <script>
-  import AliasCommand           from '../modules/Commands/AliasCommand';
-  import CatCommand             from '../modules/Commands/CatCommand';
-  import ChangeDirectoryCommand from '../modules/Commands/ChangeDirectoryCommand';
-  import ClearCommand           from '../modules/Commands/ClearCommand';
-  import CurlCommand            from '../modules/Commands/CurlCommand';
-  import DateCommand            from '../modules/Commands/DateCommand';
-  import EchoCommand            from '../modules/Commands/EchoCommand';
-  import EnvCommand             from '../modules/Commands/EnvCommand';
-  import HelpCommand            from '../modules/Commands/HelpCommand';
-  import HistoryCommand         from '../modules/Commands/HistoryCommand';
-  import ListCommand            from '../modules/Commands/ListCommand';
-  import LsCommand              from '../modules/Commands/LsCommand';
-  import PromptCommand          from '../modules/Commands/PromptCommand';
-  import SetCommand             from '../modules/Commands/SetCommand';
-  import SettermCommand         from '../modules/Commands/SettermCommand';
-  import SleepCommand           from '../modules/Commands/SleepCommand';
-  import UptimeCommand          from '../modules/Commands/UptimeCommand';
-  import Disk                   from '../modules/Filesystem/Disk';
-  import LocalStorageFilesystem from '../modules/Filesystem/LocalStorageFilesystem';
-  import Terminal               from '../modules/Terminal';
+  import AliasCommand                 from '../modules/Commands/AliasCommand';
+  import CatCommand                   from '../modules/Commands/CatCommand';
+  import ChangeDirectoryCommand       from '../modules/Commands/ChangeDirectoryCommand';
+  import ClearCommand                 from '../modules/Commands/ClearCommand';
+  import CurlCommand                  from '../modules/Commands/CurlCommand';
+  import DateCommand                  from '../modules/Commands/DateCommand';
+  import EchoCommand                  from '../modules/Commands/EchoCommand';
+  import EnvCommand                   from '../modules/Commands/EnvCommand';
+  import EvalCommand                  from '../modules/Commands/EvalCommand';
+  import HelpCommand                  from '../modules/Commands/HelpCommand';
+  import HistoryCommand               from '../modules/Commands/HistoryCommand';
+  import ListCommand                  from '../modules/Commands/ListCommand';
+  import LsCommand                    from '../modules/Commands/LsCommand';
+  import PrintWorkingDirectoryCommand from '../modules/Commands/PrintWorkingDirectoryCommand';
+  import PromptCommand                from '../modules/Commands/PromptCommand';
+  import SetCommand                   from '../modules/Commands/SetCommand';
+  import SettermCommand               from '../modules/Commands/SettermCommand';
+  import SleepCommand                 from '../modules/Commands/SleepCommand';
+  import UptimeCommand                from '../modules/Commands/UptimeCommand';
+  import Disk                         from '../modules/Filesystem/Disk';
+  import LocalStorageFilesystem       from '../modules/Filesystem/LocalStorageFilesystem';
+  import Terminal                     from '../modules/Terminal';
 
   const storage = [
     new Disk( 'sda1', new LocalStorageFilesystem( 'sda1' ), { primary: true } ),
@@ -74,8 +82,11 @@
     new UptimeCommand(),
     new SettermCommand(),
 
+    new EvalCommand(),
+
     new LsCommand(),
     new ChangeDirectoryCommand(),
+    new PrintWorkingDirectoryCommand(),
     new CatCommand()
   ];
 
@@ -103,7 +114,8 @@
       displayStyle () {
         return {
           '--shell-color':            this.terminal.style.foreground,
-          '--shell-background-color': this.terminal.style.background
+          '--shell-background-color': this.terminal.style.background,
+          '--shell-font-size':        `${this.terminal.style.fontSize}px`
         };
       }
     },
@@ -175,6 +187,10 @@
         this.terminal.flushLines();
       },
 
+      handleRemoveLastWord () {
+        this.stdinValue = this.stdinValue.replace( /\b(\w+)\W*$/ig, '' );
+      },
+
       handleCancel () {
 
         // clear the input
@@ -182,6 +198,27 @@
 
         // cancel the currently running command
         this.terminal.cancel( '^C' );
+      },
+
+      moveCursor ( input, distance ) {
+        input.focus();
+        input.setSelectionRange( distance, distance );
+      },
+
+      moveCursorStart () {
+        this.moveCursor( this.$refs.stdin, 0 );
+      },
+
+      moveCursorEnd () {
+        this.moveCursor( this.$refs.stdin, this.stdinValue.length );
+      },
+
+      increaseFontSize () {
+        this.terminal.style.fontSize += 2;
+      },
+
+      decreaseFontSize () {
+        this.terminal.style.fontSize -= 2;
       }
     }
   };
@@ -189,8 +226,8 @@
 
 <style lang="scss">
   :root {
-    --shell-background-color: black;
-    --shell-color:            white;
+    --shell-background-color: #151515;
+    --shell-color:            limegreen;
     --shell-font-family:      monospace;
     --shell-font-size:        14px;
 
