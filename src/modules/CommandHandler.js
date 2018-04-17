@@ -1,5 +1,8 @@
 'use strict';
 
+import path   from './Filesystem/path';
+import Script from './Script';
+
 class CommandHandler {
 
   /**
@@ -36,6 +39,33 @@ class CommandHandler {
         input.handler = this;
 
         return resolve( this.commands[ input.commandName ].execute( input, output ) );
+      }
+
+      // retrieve all paths from the $path environment variable
+      const binarySearchPaths = input.terminal.getEnv( 'path', '' ).split( path.delimiter );
+
+      // iterate paths
+      for ( let searchPath of binarySearchPaths ) {
+
+        // resolve command file path
+        const commandPath = path.resolve( searchPath, input.commandName );
+
+        // check to see if the command exists
+        if ( input.terminal.storage.exists( commandPath ) ) {
+          return resolve( input.terminal.storage
+                               .readFile( commandPath )
+                               .then( scriptFile => new Script( scriptFile.content ) )
+                               .then( script => script.run(
+                                 { input, output, terminal: input.terminal },
+                                 input,
+                                 output,
+                                 input.terminal,
+                                 window,
+                                 path.basename( commandPath ),
+                                 path.dirname( commandPath ),
+                                 ...input.argv.slice( 1 )
+                               ) ) );
+        }
       }
 
       return reject( `shell: ${input.commandName}: command not found` );

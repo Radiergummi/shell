@@ -11,6 +11,7 @@ Usually you can tell how bad it's made just by trying CTRL+L. I didn't want that
  - Command design inspired by Symfony console, including automatically generated command help and input validation
  - Full variable substitution, even for commands (parsing happens before command interpretation)
  - Command history, chainable commands, command aliases, exit codes and more
+ - Virtual file system, ability to plug in actual remote file systems or the browser's local storage
 
 ## Try it
 Shell is automatically deployed here:
@@ -44,10 +45,10 @@ For a detailed explanation on how things work, check out the [guide](http://vuej
 comfortable and abstracts the browser away neatly.  
 Vue is, however, *not* actually in use for the terminal implementation, that's pure JS.
 
-## Show me the darn code already!
+# Show me the darn code already!
 Here you go.
 
-### Implementing commands
+## Implementing commands
 Commands must inherit from the [`modules/Command`](./src/modules/Command.js) class, which provides a few things, 
 such as:
 
@@ -101,3 +102,29 @@ be automatically listed here, including its description.
 
 ### Automatic help
 Help is generated using the information you provide, plus anything that can be inferred from the code.
+
+## Implementing filesystems
+
+All filesystems inherit from the [`Filesystem`](./src/Filesystem.js) base class. There are two hooks of primary
+interest: `initialize` and `release`, which your filesystem should use to load and persist data. You're free, however,
+to replace any methods or properties to implement real-time persistence.
+
+Let's look at the default, [`LocalStorageFilesystem`](./src/modules/Filesystem/LocalStorageFilesystem.js):
+
+```js
+class LocalStorageFilesystem extends JsonFilesystem {
+  constructor ( name, keyName = name ) {
+    super( name, LocalStorageFilesystem._readLocalStorageItem( keyName ) );
+  }
+
+  static _readLocalStorageItem ( path ) {
+    return window.localStorage.getItem( path ) || '{}';
+  }
+
+  static _writeLocalStorageItem ( path, content ) {
+    window.localStorage.setItem( path, JSON.stringify( content ) );
+  }
+}
+```
+
+It uses the constructor to initialize

@@ -17,20 +17,27 @@ class CommandOption {
 
   static get expressions () {
     return {
-      value_none:     option => new RegExp( `^(--${option.longName}|-${option.shortName})`, 'i' ),
-      value_required: option => new RegExp( `(?:--${option.longName}|-${option.shortName})(?:[= ])?(.*)`, 'i' ),
-      value_optional: option => new RegExp( `(?:--${option.longName}|-${option.shortName})(?:[= ])?(.*)`, 'i' )
+      value_none:     option => new RegExp( `^(--${option.longName}${option.shortName
+                                                                     ? `|-${option.shortName}`
+                                                                     : ''})` ),
+      value_required: option => new RegExp( `(?:--${option.longName}${option.shortName
+                                                                      ? `|-${option.shortName}`
+                                                                      : ''})(?:[= ])?(.+)` ),
+      value_optional: option => new RegExp( `(?:--${option.longName}${option.shortName
+                                                                      ? `|-${option.shortName}`
+                                                                      : ''})(?:[= ])?(.+)` )
     };
   }
 
   /**
    * Creates a new option. All arguments but the long name are optional.
    *
-   * @param {string} longName      option name to be used as "--long-name"
-   * @param {string} [shortName]   short name to be used as "-s". will be automatically generated if omitted
-   * @param {string} [type]        option type. must use one of the static types (@see CommandOption#types)
-   * @param {string} [description] option description for the help text
-   * @param {string} [valueLabel]  label for the command value used in the help text, if available
+   * @param {string}      longName      option name to be used as "--long-name"
+   * @param {string|null} [shortName]   short name to be used as "-s". will be automatically generated if omitted.
+   *                                    to disable the short name, pass null
+   * @param {string}      [type]        option type. must use one of the static types (@see CommandOption#types)
+   * @param {string}      [description] option description for the help text
+   * @param {string}      [valueLabel]  label for the command value used in the help text, if available
    */
   constructor (
     longName,
@@ -52,7 +59,8 @@ class CommandOption {
    * @return {string}
    */
   get help () {
-    return `-${this.shortName}, --${this.longName}` + ( this.isFlag ? '' : ` <${this.valueLabel || this.longName}>` );
+    return ( this.shortName ? `-${this.shortName}, ` : '' ) +
+           `--${this.longName}` + ( this.isFlag ? '' : ` <${this.valueLabel || this.longName}>` );
   }
 
   /**

@@ -63,6 +63,7 @@ class Terminal {
      * @type {object}
      */
     this.environment = {
+      path:         '/bin:/sbin',
       pwd:          '/',
       user:         'test',
       hostname:     window.location.hostname,
@@ -72,7 +73,8 @@ class Terminal {
 
     this.style = {
       background: 'black',
-      foreground: 'white'
+      foreground: 'white',
+      fontSize:   14
     };
 
     this.environment.promptString = `$user@$hostname $pwd # `;
@@ -287,13 +289,21 @@ class Terminal {
         [ call, redirection ] = call.split( ' > ' );
       }
 
+      const commandInput  = new Input( this, call );
+      const commandOutput = new Output(
+        this,
+        redirection
+        ? new FileOutputStream( this.storage.find( redirection ) )
+        : undefined
+      );
+
       // set up a race condition between actual command and cancellator
       const output = await Promise
         .race(
           [
             this.handler.handle(
-              new Input( this, call ),
-              new Output( this, redirection ? new FileOutputStream( this.storage.find( redirection ) ) : undefined )
+              commandInput,
+              commandOutput
             ),
 
             this.constructor._cancellator.call( this )

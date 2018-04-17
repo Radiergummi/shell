@@ -5,12 +5,13 @@ class CommandArgument {
   /**
    * Holds the available argument types
    *
-   * @return {{value_required: string, value_optional: string}}
+   * @return {{value_required: string, value_optional: string, value_array: string}}
    */
   static get types () {
     return {
       value_required: 'required',
-      value_optional: 'optional'
+      value_optional: 'optional',
+      value_array:    'array'
     };
   }
 

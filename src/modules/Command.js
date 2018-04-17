@@ -171,7 +171,8 @@ class Command {
   parseInput ( input ) {
 
     // get a copy of the argv array
-    const args = Array.from( input.argv );
+    const args      = Array.from( input.argv );
+    const argString = args.join( ' ' );
 
     // iterate all options
     for ( let option of this._options ) {
@@ -199,7 +200,7 @@ class Command {
 
             // command options with an optional input value
             case CommandOption.types.value_optional:
-              let [ optionalValue ] = ( arg.match(
+              let [ optionalValue ] = ( argString.match(
                 CommandOption.expressions.value_optional( option )
               ) || [] ).slice( 1 );
 
@@ -211,7 +212,7 @@ class Command {
 
             // command options with a required input value
             case CommandOption.types.value_required:
-              let [ requiredValue ] = ( arg.match(
+              let [ requiredValue ] = ( argString.match(
                 CommandOption.expressions.value_required( option )
               ) || [] ).slice( 1 );
 
@@ -269,8 +270,14 @@ class Command {
         }
       } else {
 
-        // otherwise, just shift the args to receive the value
-        value = args.shift();
+        // if we have an array arg, assign all left args
+        if ( argument.type === CommandArgument.types.value_array ) {
+          value = args;
+        } else {
+
+          // otherwise, just shift the args to receive the value
+          value = args.shift();
+        }
       }
 
       input.arguments.push( {
@@ -318,7 +325,7 @@ class Command {
    */
   addArgument (
     name,
-    argumentType = this.constructor.argumentTypes.required,
+    argumentType = CommandArgument.types.value_required,
     description  = '',
     fallback     = null
   ) {
